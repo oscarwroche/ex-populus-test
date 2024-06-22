@@ -6,9 +6,10 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-contract-sizer";
-import {HardhatUserConfig} from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 
-const mnemonic = "major ostrich lake feed mean term sort essay claw catch deal toddler naive subject inmate";
+const mnemonic =
+  "major ostrich lake feed mean term sort essay claw catch deal toddler naive subject inmate";
 
 const accounts = {
   count: 10,
@@ -24,7 +25,7 @@ export const config: HardhatUserConfig & any = {
       accounts,
       chainId: 43114,
       blockGasLimit: 30000000,
-    }
+    },
   },
   paths: {
     artifacts: "./artifacts",
@@ -34,10 +35,10 @@ export const config: HardhatUserConfig & any = {
   },
   solidity: {
     compilers: [
-      {version: "0.8.12", settings: {}},
-      {version: "0.8.9", settings: {}},
-      {version: "0.8.0", settings: {}},
-      {version: "0.6.2", settings: {}},
+      { version: "0.8.12", settings: {} },
+      { version: "0.8.9", settings: {} },
+      { version: "0.8.0", settings: {} },
+      { version: "0.6.2", settings: {} },
     ],
     settings: {
       metadata: {

@@ -21,20 +21,14 @@
                 "evm.methodIdentifiers",
                 "metadata"
               ],
-              "": [
-                "ast"
-              ]
+              "": ["ast"]
             }
           }
         }
       },
       "imports": [],
-      "versionPragmas": [
-        "^0.8.12"
-      ],
-      "artifacts": [
-        "ExPopulusCardGameLogic"
-      ]
+      "versionPragmas": ["^0.8.12"],
+      "artifacts": ["ExPopulusCardGameLogic"]
     },
     "/Users/spencergray/Documents/GitHub/blockchain-take-home/takehome-contracts/contracts/ExPopulusCards.sol": {
       "lastModificationDate": 1705986591301,
@@ -56,20 +50,14 @@
                 "evm.methodIdentifiers",
                 "metadata"
               ],
-              "": [
-                "ast"
-              ]
+              "": ["ast"]
             }
           }
         }
       },
       "imports": [],
-      "versionPragmas": [
-        "^0.8.12"
-      ],
-      "artifacts": [
-        "ExPopulusCards"
-      ]
+      "versionPragmas": ["^0.8.12"],
+      "artifacts": ["ExPopulusCards"]
     },
     "/Users/spencergray/Documents/GitHub/blockchain-take-home/takehome-contracts/contracts/ExPopulusToken.sol": {
       "lastModificationDate": 1705992781421,
@@ -91,20 +79,14 @@
                 "evm.methodIdentifiers",
                 "metadata"
               ],
-              "": [
-                "ast"
-              ]
+              "": ["ast"]
             }
           }
         }
       },
       "imports": [],
-      "versionPragmas": [
-        "^0.8.12"
-      ],
-      "artifacts": [
-        "ExPopulusToken"
-      ]
+      "versionPragmas": ["^0.8.12"],
+      "artifacts": ["ExPopulusToken"]
     }
   }
 }
