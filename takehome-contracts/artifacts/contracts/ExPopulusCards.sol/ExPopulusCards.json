@@ -1,0 +1,23 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ExPopulusCards",
+  "sourceName": "contracts/ExPopulusCards.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "mintCard",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50606d80601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80633993c22014602d575b600080fd5b60336035565b005b56fea26469706673582212205ffa46465392c28c368bbc440a7c790dbe6951940f6cb536d4bf924ce065264464736f6c634300080c0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80633993c22014602d575b600080fd5b60336035565b005b56fea26469706673582212205ffa46465392c28c368bbc440a7c790dbe6951940f6cb536d4bf924ce065264464736f6c634300080c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

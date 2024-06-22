@@ -1,0 +1,110 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/spencergray/Documents/GitHub/blockchain-take-home/takehome-contracts/contracts/ExPopulusCardGameLogic.sol": {
+      "lastModificationDate": 1705988080536,
+      "contentHash": "90adb31bf0829d26b842c3ff5da657f7",
+      "sourceName": "contracts/ExPopulusCardGameLogic.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.12"
+      ],
+      "artifacts": [
+        "ExPopulusCardGameLogic"
+      ]
+    },
+    "/Users/spencergray/Documents/GitHub/blockchain-take-home/takehome-contracts/contracts/ExPopulusCards.sol": {
+      "lastModificationDate": 1705986591301,
+      "contentHash": "c2587f641a81ade16f4ec57d057173ae",
+      "sourceName": "contracts/ExPopulusCards.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.12"
+      ],
+      "artifacts": [
+        "ExPopulusCards"
+      ]
+    },
+    "/Users/spencergray/Documents/GitHub/blockchain-take-home/takehome-contracts/contracts/ExPopulusToken.sol": {
+      "lastModificationDate": 1705992781421,
+      "contentHash": "26789a0fbced0d15ae254e07f296321a",
+      "sourceName": "contracts/ExPopulusToken.sol",
+      "solcConfig": {
+        "version": "0.8.12",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.12"
+      ],
+      "artifacts": [
+        "ExPopulusToken"
+      ]
+    }
+  }
+}

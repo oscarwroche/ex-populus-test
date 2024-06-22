@@ -1,0 +1,23 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ExPopulusCardGameLogic",
+  "sourceName": "contracts/ExPopulusCardGameLogic.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "battle",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50606d80601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806344e4454514602d575b600080fd5b60336035565b005b56fea2646970667358221220300e5d03b5ec2abf24e14008127b09829da17eb87d24aec68263882d33d9ff1964736f6c634300080c0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c806344e4454514602d575b600080fd5b60336035565b005b56fea2646970667358221220300e5d03b5ec2abf24e14008127b09829da17eb87d24aec68263882d33d9ff1964736f6c634300080c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,23 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ExPopulusToken",
+  "sourceName": "contracts/ExPopulusToken.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "mintToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50606d80601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80632004ffd914602d575b600080fd5b60336035565b005b56fea26469706673582212206e550475b25e2744a428d540e24941fdebf30e98d8198d6ca584d825f2334df164736f6c634300080c0033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80632004ffd914602d575b600080fd5b60336035565b005b56fea26469706673582212206e550475b25e2744a428d540e24941fdebf30e98d8198d6ca584d825f2334df164736f6c634300080c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
