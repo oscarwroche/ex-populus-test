@@ -85,17 +85,17 @@ describe("Unit tests", function () {
       const { exPopulusToken, exPopulusCards } = this.contracts;
 
       // Set priorities without conflict
-      const setPriorityTx1 = await exPopulusToken
+      const setPriorityTx1 = await exPopulusCards
         .connect(this.signers.creator)
         .setAbilityPriority(0, 4); // Shield to priority 1
       await setPriorityTx1.wait();
 
-      const setPriorityTx2 = await exPopulusToken
+      const setPriorityTx2 = await exPopulusCards
         .connect(this.signers.creator)
         .setAbilityPriority(1, 6); // Roulette to priority 0
       await setPriorityTx2.wait();
 
-      const setPriorityTx3 = await exPopulusToken
+      const setPriorityTx3 = await exPopulusCards
         .connect(this.signers.creator)
         .setAbilityPriority(2, 7); // Freeze to priority 2
       await setPriorityTx3.wait();
@@ -111,17 +111,17 @@ describe("Unit tests", function () {
     });
 
     it("Cannot set multiple abilities to the same priority", async function () {
-      const { exPopulusToken } = this.contracts;
+      const { exPopulusCards } = this.contracts;
 
       // Set a valid priority
-      const setPriorityTx = await exPopulusToken
+      const setPriorityTx = await exPopulusCards
         .connect(this.signers.creator)
         .setAbilityPriority(0, 1); // Shield to priority 1
       await setPriorityTx.wait();
 
       // Attempt to set another ability to the same priority
       await expect(
-        exPopulusToken.connect(this.signers.creator).setAbilityPriority(1, 1), // Attempt to set Freeze to priority 1
+        exPopulusCards.connect(this.signers.creator).setAbilityPriority(1, 1), // Attempt to set Freeze to priority 1
       ).to.be.rejectedWith("Priority already assigned to another ability");
     });
   });

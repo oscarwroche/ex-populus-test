@@ -25,7 +25,7 @@ export async function deployContracts(): Promise<IDeployContractsOutput> {
 
   const exPopulusTokenContract = await ethers.deployContract(
     "ExPopulusToken",
-    [exPopulusCardsContract.address], // Pass the address of ExPopulusCards as the constructor argument
+    [creator.address, exPopulusCardsContract.address], // Pass the address of ExPopulusCards as the constructor argument
     creator,
   );
   await exPopulusTokenContract.deployed();
