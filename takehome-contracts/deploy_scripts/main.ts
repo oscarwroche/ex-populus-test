@@ -23,18 +23,23 @@ export async function deployContracts(): Promise<IDeployContractsOutput> {
   );
   await exPopulusCardsContract.deployed();
 
-  const exPopulusTokenContract = await ethers.deployContract(
-    "ExPopulusToken",
-    [creator.address, exPopulusCardsContract.address], // Pass the address of ExPopulusCards as the constructor argument
-    creator,
-  );
-  await exPopulusTokenContract.deployed();
-
   const exPopulusCardGameLogicContract = await ethers.deployContract(
     "ExPopulusCardGameLogic",
+    [exPopulusCardsContract.address],
     creator,
   );
   await exPopulusCardGameLogicContract.deployed();
+
+  const exPopulusTokenContract = await ethers.deployContract(
+    "ExPopulusToken",
+    [
+      creator.address,
+      exPopulusCardsContract.address,
+      exPopulusCardGameLogicContract.address,
+    ], // Pass the address of ExPopulusCards as the constructor argument
+    creator,
+  );
+  await exPopulusTokenContract.deployed();
 
   return {
     exPopulusToken: exPopulusTokenContract as ExPopulusToken,

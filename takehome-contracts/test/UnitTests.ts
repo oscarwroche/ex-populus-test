@@ -82,7 +82,7 @@ describe("Unit tests", function () {
 
   describe("User Story #2 (Ability Configuration)", async function () {
     it("Can set and get ability priorities", async function () {
-      const { exPopulusToken, exPopulusCards } = this.contracts;
+      const { exPopulusCards } = this.contracts;
 
       // Set priorities without conflict
       const setPriorityTx1 = await exPopulusCards
@@ -123,6 +123,35 @@ describe("Unit tests", function () {
       await expect(
         exPopulusCards.connect(this.signers.creator).setAbilityPriority(1, 1), // Attempt to set Freeze to priority 1
       ).to.be.rejectedWith("Priority already assigned to another ability");
+    });
+  });
+
+  describe("User story #3 (Game loop)", async function () {
+    it("Can run a battle and update win streaks", async function () {
+      // Assume battle logic is correctly implemented in ExPopulusCardGameLogic
+      const { exPopulusToken, exPopulusCardGameLogic } = this.contracts;
+      const { creator, testAccount2 } = this.signers;
+
+      // Mint cards for the player
+      await exPopulusToken
+        .connect(creator)
+        .mintToken(testAccount2.address, 100, 50, 1);
+      await exPopulusToken
+        .connect(creator)
+        .mintToken(testAccount2.address, 80, 60, 0);
+      await exPopulusToken
+        .connect(creator)
+        .mintToken(testAccount2.address, 90, 55, 2);
+
+      // Run a battle
+      await exPopulusToken.connect(testAccount2).battle([0, 2, 3]);
+
+      // Check win streak
+      const winStreak = await exPopulusCardGameLogic
+        .connect(testAccount2)
+        .getWinStreak(testAccount2.address);
+
+      expect(winStreak).to.equal(1); // Assuming the player wins the battle
     });
   });
 
