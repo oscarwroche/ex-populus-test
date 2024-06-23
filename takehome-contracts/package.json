@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "hardhat clean",
     "compile": "hardhat compile --verbose",
-    "deploy-locally": "hardhat --network localhost run scripts/deploy_initial_infrastructure/deployInitialInfrastructureLocally.ts",
+    "deploy-locally": "hardhat --network localhost run deploy_scripts/main.ts",
     "deploy:network": "hardhat run scripts/deploy_ff_infrastructure/main.ts --network",
     "deploy-metafab-test:network": "hardhat run scripts/deployTestMetafabContract.ts --network",
     "test": "hardhat test",
