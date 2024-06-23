@@ -1,3 +1,5 @@
+// deploy_scripts/main.ts
+
 import "../hardhat.config";
 import { ethers } from "hardhat";
 import {
@@ -15,21 +17,22 @@ export interface IDeployContractsOutput {
 export async function deployContracts(): Promise<IDeployContractsOutput> {
   const creator = (await ethers.getSigners())[0];
 
-  const exPopulusTokenContract = await ethers.deployContract(
-    "ExPopulusToken",
-    creator
-  );
-  await exPopulusTokenContract.deployed();
-
   const exPopulusCardsContract = await ethers.deployContract(
     "ExPopulusCards",
-    creator
+    creator,
   );
   await exPopulusCardsContract.deployed();
 
+  const exPopulusTokenContract = await ethers.deployContract(
+    "ExPopulusToken",
+    [exPopulusCardsContract.address], // Pass the address of ExPopulusCards as the constructor argument
+    creator,
+  );
+  await exPopulusTokenContract.deployed();
+
   const exPopulusCardGameLogicContract = await ethers.deployContract(
     "ExPopulusCardGameLogic",
-    creator
+    creator,
   );
   await exPopulusCardGameLogicContract.deployed();
 
