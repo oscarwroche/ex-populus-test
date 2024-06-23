@@ -8,3 +8,6 @@ meta/**/wallet.json
 meta/**/wallet-final.json
 meta/**/config.json
 tcg_portal/public/build
+**/typechain
+**/cache
+**/artifacts
