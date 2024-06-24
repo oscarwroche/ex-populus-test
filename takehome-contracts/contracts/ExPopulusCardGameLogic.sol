@@ -116,17 +116,16 @@ contract ExPopulusCardGameLogic {
 
     function processAbility(ExtendedCard memory firstPlayerCard, ExtendedCard memory secondPlayerCard) internal returns (ExtendedCard memory, ExtendedCard memory) {
 	uint8 playerAbility = firstPlayerCard.card.ability;
-        // Check ability priority
 	if (!firstPlayerCard.isFrozen) {
 	    // Shield
 	    if (playerAbility == 0) {
 		firstPlayerCard.isShielded = true;
-	    } else if (playerAbility == 1) {
+	    } else if (playerAbility == 2) {
 		// Roulette
 		if (block.timestamp % 10 == 0) {
 		    firstPlayerCard.wins = true;
 		}
-	    } else if (playerAbility == 2 && !secondPlayerCard.isShielded) {
+	    } else if (playerAbility == 1 && !secondPlayerCard.isShielded) {
 		// Frozen
 		secondPlayerCard.isFrozen = true;
 	    }

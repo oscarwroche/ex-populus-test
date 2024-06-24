@@ -27,7 +27,7 @@ contract ExPopulusCards is ERC721, Ownable {
 	cardGameLogicContract = ExPopulusCardGameLogic(cardGameLogicContractAddress);
 	abilityPriorities[0] = 0; // Shield
         abilityPriorities[1] = 1; // Freeze
-        abilityPriorities[2] = 2;
+        abilityPriorities[2] = 2; // Roulette
     }
 
     function approveMinter(address minter) external onlyOwner {
