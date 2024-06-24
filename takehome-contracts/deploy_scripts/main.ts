@@ -19,19 +19,27 @@ export async function deployContracts(
     creator,
   );
 
-  const exPopulusCardsContract = await ethers.deployContract(
-    "ExPopulusCards",
-    [creator.address, randomNumberGenerator.address],
-    creator,
-  );
-  await exPopulusCardsContract.deployed();
-
   const exPopulusTokenContract = await ethers.deployContract(
     "ExPopulusToken",
     [creator.address],
     creator,
   );
   await exPopulusTokenContract.deployed();
+
+  const exPopulusCardsContract = await ethers.deployContract(
+    "ExPopulusCards",
+    [
+      creator.address,
+      exPopulusTokenContract.address,
+      randomNumberGenerator.address,
+    ],
+    creator,
+  );
+  await exPopulusCardsContract.deployed();
+
+  await exPopulusTokenContract
+    .connect(creator)
+    .setAuthorizedMinter(exPopulusCardsContract.address);
 
   return {
     exPopulusToken: exPopulusTokenContract as ExPopulusToken,
