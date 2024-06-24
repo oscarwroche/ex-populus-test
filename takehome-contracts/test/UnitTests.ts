@@ -4,6 +4,7 @@ import { Signers } from "../types";
 import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { deployContracts } from "../deploy_scripts/main";
+import { BigNumber } from "ethers";
 
 describe("Unit tests - #1/#2", function () {
   before(async function () {
@@ -180,7 +181,7 @@ describe("Unit tests - #3", function () {
   });
 
   describe("User story #3 (Game loop)", async function () {
-    it("Can run several battle and show a win streak for consecutive wins", async function () {
+    it("Can run several battles and show a win streak for consecutive wins", async function () {
       const { exPopulusCards } = this.contracts;
       const { testAccount2 } = this.signers;
 
@@ -213,5 +214,29 @@ describe("Unit tests - #3", function () {
     });
   });
 
-  // Other user stories can go here
+  describe("User story #4 (Reward)", async function () {
+    it("Can get the rewards", async function () {
+      const { exPopulusToken } = this.contracts;
+      const { testAccount2 } = this.signers;
+
+      const tokenBalance = await exPopulusToken.balanceOf(testAccount2.address);
+
+      expect(tokenBalance).to.equal(BigNumber.from(300));
+    });
+
+    it("Can get more rewards after a win streak", async function () {
+      const { exPopulusCards, exPopulusToken } = this.contracts;
+      const { testAccount2 } = this.signers;
+
+      // Run a battle
+      await exPopulusCards.connect(testAccount2).battle([0, 2, 3]);
+      await exPopulusCards.connect(testAccount2).battle([0, 2, 3]);
+      await exPopulusCards.connect(testAccount2).battle([0, 2, 3]);
+      await exPopulusCards.connect(testAccount2).battle([0, 2, 3]);
+
+      const tokenBalance = await exPopulusToken.balanceOf(testAccount2.address);
+
+      expect(tokenBalance).to.equal(BigNumber.from(1600));
+    });
+  });
 });
