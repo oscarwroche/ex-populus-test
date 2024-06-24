@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RandomNumberGenerator.sol";
+import "./ExPopulusToken.sol";
+
 import "hardhat/console.sol";
 
 contract ExPopulusCards is ERC721, Ownable {
@@ -25,17 +27,20 @@ contract ExPopulusCards is ERC721, Ownable {
 
     uint256 private nextCardId;
     RandomNumberGenerator public randomNumberGeneratorContract;
+    ExPopulusToken public tokenContract;
 
     mapping(uint256 => Card) private cards;
     mapping(uint8 => uint8) private abilityPriorities;
     mapping(address => bool) private approvedMinters;
     mapping(address => uint256) private winStreaks;
+    mapping(address => uint256) private wins;
 
-    constructor(address initialOwner, address randomNumberGeneratorContractAddress) ERC721("ExPopulusCardToken", "EPCT") Ownable(initialOwner) {
+    constructor(address initialOwner, address tokenContractAddress, address randomNumberGeneratorContractAddress) ERC721("ExPopulusCardToken", "EPCT") Ownable(initialOwner) {
 	abilityPriorities[0] = 0; // Shield
         abilityPriorities[1] = 1; // Freeze
         abilityPriorities[2] = 2; // Roulette
 	randomNumberGeneratorContract = RandomNumberGenerator(randomNumberGeneratorContractAddress);
+	tokenContract = ExPopulusToken(tokenContractAddress);
     }
 
     function mintToken(address to, uint256 health, uint256 attack, uint8 ability) public {
@@ -121,6 +126,16 @@ contract ExPopulusCards is ERC721, Ownable {
 
         // Run the battle logic
         bool playerWins = runBattle(playerCardIds, enemyCardIds);
+
+	if (playerWins) {
+	    wins[player]++;
+	    uint256 numberOfWins = wins[player];
+	    if (numberOfWins % 5 == 0 && numberOfWins != 0) {
+		tokenContract.mintToken(player, 1000);
+	    } else {
+	        tokenContract.mintToken(player, 100);
+	    }
+	}
 
         // Update win streak
         updateWinStreak(player, playerWins);
@@ -244,7 +259,7 @@ contract ExPopulusCards is ERC721, Ownable {
 	return (firstPlayerExtendedCard, secondPlayerExtendedCard);
     }
 
-    function getWinStreak(address player) external view returns (uint256) {
+    function getWinStreak(address player) public view returns (uint256) {
         return winStreaks[player];
     }
 
