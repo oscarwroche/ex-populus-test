@@ -9,12 +9,19 @@ export interface IDeployContractsOutput {
   exPopulusCards: ExPopulusCards;
 }
 
-export async function deployContracts(): Promise<IDeployContractsOutput> {
+export async function deployContracts(
+  mockRng?: boolean,
+): Promise<IDeployContractsOutput> {
   const creator = (await ethers.getSigners())[0];
+
+  const randomNumberGenerator = await ethers.deployContract(
+    mockRng ? "RandomNumberGeneratorMock" : "RandomNumberGenerator",
+    creator,
+  );
 
   const exPopulusCardsContract = await ethers.deployContract(
     "ExPopulusCards",
-    [creator.address],
+    [creator.address, randomNumberGenerator.address],
     creator,
   );
   await exPopulusCardsContract.deployed();

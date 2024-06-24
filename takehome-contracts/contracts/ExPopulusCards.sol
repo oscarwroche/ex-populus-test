@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./RandomNumberGenerator.sol";
 import "hardhat/console.sol";
 
 contract ExPopulusCards is ERC721, Ownable {
@@ -22,17 +23,19 @@ contract ExPopulusCards is ERC721, Ownable {
 	bool wins;
     }
 
+    uint256 private nextCardId;
+    RandomNumberGenerator public randomNumberGeneratorContract;
+
     mapping(uint256 => Card) private cards;
     mapping(uint8 => uint8) private abilityPriorities;
-
-    uint256 private nextCardId;
     mapping(address => bool) private approvedMinters;
     mapping(address => uint256) private winStreaks;
 
-    constructor(address initialOwner) ERC721("ExPopulusCardToken", "EPCT") Ownable(initialOwner) {
+    constructor(address initialOwner, address randomNumberGeneratorContractAddress) ERC721("ExPopulusCardToken", "EPCT") Ownable(initialOwner) {
 	abilityPriorities[0] = 0; // Shield
         abilityPriorities[1] = 1; // Freeze
         abilityPriorities[2] = 2; // Roulette
+	randomNumberGeneratorContract = RandomNumberGenerator(randomNumberGeneratorContractAddress);
     }
 
     function mintToken(address to, uint256 health, uint256 attack, uint8 ability) public {
@@ -100,12 +103,12 @@ contract ExPopulusCards is ERC721, Ownable {
         require(nextCardId >= count, "Not enough cards");
         uint256[] memory cardIds = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
-            cardIds[i] = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, i))) % nextCardId;
+            cardIds[i] = randomNumberGeneratorContract.generate(i) % nextCardId;
         }
         return cardIds;
     }
 
-     function battle(address player, uint256[] calldata playerCardIds) internal {
+    function battle(address player, uint256[] calldata playerCardIds) internal {
         require(playerCardIds.length == 3, "Must submit 3 cards");
 
         // Get enemy card IDs
@@ -135,7 +138,21 @@ contract ExPopulusCards is ERC721, Ownable {
 		uint8 playerAbilityPriority = getAbilityPriority(extendedPlayerCard.card.ability);
 		uint8 enemyAbilityPriority = getAbilityPriority(extendedEnemyCard.card.ability);
 
-		console.log(extendedPlayerCard.card.health, extendedEnemyCard.card.health);
+		console.log("front indices");
+		console.log(playerFrontIndex, enemyFrontIndex);
+		console.log("card attacks");
+		console.log(extendedPlayerCard.card.attack, extendedEnemyCard.card.attack);
+		console.log("card ability");
+		console.log(extendedPlayerCard.card.ability, extendedEnemyCard.card.ability);
+		console.log("current healths");
+		console.logInt(extendedPlayerCard.currentHealth);
+		console.logInt(extendedEnemyCard.currentHealth);
+		console.log("has used ability");
+		console.log(extendedPlayerCard.hasUsedAbility, extendedEnemyCard.hasUsedAbility);
+		console.log("is shielded");
+		console.log(extendedPlayerCard.isShielded, extendedEnemyCard.isShielded);
+		console.log("is frozen");
+		console.log(extendedPlayerCard.isFrozen, extendedEnemyCard.isFrozen);
 
 		if (playerAbilityPriority >= enemyAbilityPriority) {
 		    if (!extendedPlayerCard.hasUsedAbility) {
@@ -152,19 +169,21 @@ contract ExPopulusCards is ERC721, Ownable {
 		    }
 		} else {
 		    if (!extendedEnemyCard.hasUsedAbility) {
-			processAbility(extendedEnemyCard, extendedPlayerCard);
+			(extendedEnemyCard, extendedPlayerCard) = processAbility(extendedEnemyCard, extendedPlayerCard);
 		    }
 		    if (extendedEnemyCard.wins) {
 			return false;
 		    }
 		    if (!extendedPlayerCard.hasUsedAbility) {
-			processAbility(extendedPlayerCard, extendedEnemyCard);
+			(extendedPlayerCard, extendedEnemyCard) = processAbility(extendedPlayerCard, extendedEnemyCard);
 		    }
 		    if (extendedPlayerCard.wins) {
 			return true;
 		    }
 		}
-		processAttack(extendedPlayerCard, extendedEnemyCard);
+		(extendedPlayerCard, extendedEnemyCard) = processAttack(extendedPlayerCard, extendedEnemyCard);
+		extendedPlayerCard = resetExtendedCardStatus(extendedPlayerCard);
+	        extendedEnemyCard = resetExtendedCardStatus(extendedEnemyCard);
 	    }
 
             if (extendedPlayerCard.currentHealth <= 0) {
@@ -183,9 +202,6 @@ contract ExPopulusCards is ERC721, Ownable {
 		    extendedEnemyCard = initializeExtendedCard(playerCardIds[playerFrontIndex]);
 		}
             }
-
-	    resetExtendedCardStatus(extendedPlayerCard);
-	    resetExtendedCardStatus(extendedEnemyCard);
         }
     }
 
@@ -206,7 +222,7 @@ contract ExPopulusCards is ERC721, Ownable {
 		firstPlayerCard.isShielded = true;
 	    } else if (playerAbility == 2) {
 		// Roulette
-		if (block.timestamp % 10 == 0) {
+		if (randomNumberGeneratorContract.generateRoulette() % 10 == 0) {
 		    firstPlayerCard.wins = true;
 		}
 	    } else if (playerAbility == 1 && !secondPlayerCard.isShielded) {
@@ -214,6 +230,7 @@ contract ExPopulusCards is ERC721, Ownable {
 		secondPlayerCard.isFrozen = true;
 	    }
 	}
+	firstPlayerCard.hasUsedAbility = true;
 	return (firstPlayerCard, secondPlayerCard);
     }
 
