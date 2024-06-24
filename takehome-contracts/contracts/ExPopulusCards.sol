@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-contract ExPopulusCards {
+import "./ExPopulusCardGameLogic.sol";
+
+contract ExPopulusCards is ERC721, Ownable {
     struct Card {
         uint256 id;
         uint256 health;
@@ -14,19 +19,41 @@ contract ExPopulusCards {
     mapping(uint8 => uint8) private abilityPriorities;
 
     uint256 private nextCardId;
-    address public owner;
+    ExPopulusCards public cardsContract;
+    ExPopulusCardGameLogic public cardGameLogicContract;
+    mapping(address => bool) private approvedMinters;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not authorized");
-        _;
+    constructor(address initialOwner, address cardGameLogicContractAddress) ERC721("ExPopulusCardToken", "EPCT") Ownable(initialOwner) {
+	cardGameLogicContract = ExPopulusCardGameLogic(cardGameLogicContractAddress);
+	abilityPriorities[0] = 0; // Shield
+        abilityPriorities[1] = 1; // Freeze
+        abilityPriorities[2] = 2;
     }
 
-    constructor() {
-	owner = msg.sender;
-        // Initialize default ability priorities: Shield > Freeze > Roulette
-        abilityPriorities[0] = 0; // Shield
-        abilityPriorities[1] = 1; // Freeze
-        abilityPriorities[2] = 2; // Roulette
+    function approveMinter(address minter) external onlyOwner {
+	approvedMinters[minter] = true;
+    }
+
+    function revokeMinter(address minter) external onlyOwner {
+	approvedMinters[minter] = false;
+    }
+
+    function mintToken(address to, uint256 health, uint256 attack, uint8 ability) public {
+	require(msg.sender == owner() || approvedMinters[msg.sender], "Not authorized to mint");
+        require(ability <= 2, "Ability value must be 0, 1, or 2");
+
+	uint256 tokenId = cardsContract.createCard(health, attack, ability);
+        _mint(to, tokenId);
+    }
+
+    function battle(uint256[] calldata cardIds) external {
+        for (uint256 i = 0; i < cardIds.length; i++) {
+            require(ownerOf(cardIds[i]) == msg.sender, "Not the owner of the card");
+            for (uint256 j = i + 1; j < cardIds.length; j++) {
+                require(cardIds[i] != cardIds[j], "Duplicate card ID");
+            }
+        }
+        cardGameLogicContract.battle(msg.sender, cardIds);
     }
 
     function createCard(uint256 health, uint256 attack, uint8 ability) external returns (uint256) {
@@ -63,7 +90,6 @@ contract ExPopulusCards {
     }
 
     function getRandomCardIds(uint256 count) external view returns (uint256[] memory) {
-	console.log("RANDOM DEBUG", nextCardId, count);
         require(nextCardId >= count, "Not enough cards");
         uint256[] memory cardIds = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {

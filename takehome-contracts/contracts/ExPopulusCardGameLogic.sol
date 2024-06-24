@@ -47,7 +47,6 @@ contract ExPopulusCardGameLogic {
 	ExtendedCard memory extendedEnemyCard = initializeExtendedCard(enemyCardIds[enemyFrontIndex]);
 
         while (true) {
-	    console.log(extendedPlayerCard.card.ability, extendedEnemyCard.card.ability);
 	    while (extendedPlayerCard.currentHealth > 0 && extendedEnemyCard.currentHealth > 0) {
 		uint8 playerAbilityPriority = cardsContract.getAbilityPriority(extendedPlayerCard.card.ability);
 		uint8 enemyAbilityPriority = cardsContract.getAbilityPriority(extendedEnemyCard.card.ability);
@@ -56,13 +55,13 @@ contract ExPopulusCardGameLogic {
 
 		if (playerAbilityPriority >= enemyAbilityPriority) {
 		    if (!extendedPlayerCard.hasUsedAbility) {
-			processAbility(extendedPlayerCard, extendedEnemyCard);
+			(extendedPlayerCard, extendedEnemyCard) = processAbility(extendedPlayerCard, extendedEnemyCard);
 		    }
 		    if (extendedPlayerCard.wins) {
 			return true;
 		    }
 		    if (!extendedEnemyCard.hasUsedAbility) {
-			processAbility(extendedEnemyCard, extendedPlayerCard);
+			(extendedEnemyCard, extendedPlayerCard) = processAbility(extendedEnemyCard, extendedPlayerCard);
 		    }
 		    if (extendedEnemyCard.wins) {
 			return false;
