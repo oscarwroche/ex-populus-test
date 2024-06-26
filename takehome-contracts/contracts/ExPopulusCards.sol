@@ -6,8 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./RandomNumberGenerator.sol";
 import "./ExPopulusToken.sol";
 
-import "hardhat/console.sol";
-
 contract ExPopulusCards is ERC721, Ownable {
     struct Card {
         uint256 id;
@@ -25,7 +23,19 @@ contract ExPopulusCards is ERC721, Ownable {
 	bool wins;
     }
 
+    enum EventType { Ability, Attack, Death, GameEnd }
+    enum PlayerType { Player, Enemy }
+
+    struct BattleEvent { // The player address could also be added but for now I trust the data will be retrieved using the returned battleId
+	EventType eventType;
+	PlayerType playerType; // GameEnd (resp. Death) with PlayerType.Player means Player lost (resp. card died)
+        uint256 abilityId;
+	uint256 attackDamage;
+    }
+
     uint256 private nextCardId;
+    uint256 private battleId;
+
     RandomNumberGenerator public randomNumberGeneratorContract;
     ExPopulusToken public tokenContract;
 
@@ -34,6 +44,7 @@ contract ExPopulusCards is ERC721, Ownable {
     mapping(address => bool) private approvedMinters;
     mapping(address => uint256) private winStreaks;
     mapping(address => uint256) private wins;
+    mapping(uint256 => BattleEvent[]) private battleData;
 
     constructor(address initialOwner, address tokenContractAddress, address randomNumberGeneratorContractAddress) ERC721("ExPopulusCardToken", "EPCT") Ownable(initialOwner) {
 	abilityPriorities[0] = 0; // Shield
@@ -74,14 +85,16 @@ contract ExPopulusCards is ERC721, Ownable {
 	return cardId;
     }
 
-    function battle(uint256[] calldata cardIds) external {
+    function battle(uint256[] calldata cardIds) external returns (uint256) {
         for (uint256 i = 0; i < cardIds.length; i++) {
             require(ownerOf(cardIds[i]) == msg.sender, "Not the owner of the card");
             for (uint256 j = i + 1; j < cardIds.length; j++) {
                 require(cardIds[i] != cardIds[j], "Duplicate card ID");
             }
         }
+	battleId++;
         battle(msg.sender, cardIds);
+	return(battleId);
     }
 
     function getCardDetails(uint256 cardId) public view returns (Card memory) {
@@ -104,7 +117,7 @@ contract ExPopulusCards is ERC721, Ownable {
 
     // Game logic below
 
-    function getRandomCardIds(uint256 count) internal returns (uint256[] memory) {
+    function getRandomCardIds(uint256 count) internal view returns (uint256[] memory) {
         require(nextCardId >= count, "Not enough cards");
         uint256[] memory cardIds = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
@@ -141,7 +154,7 @@ contract ExPopulusCards is ERC721, Ownable {
         updateWinStreak(player, playerWins);
     }
 
-    function runBattle(uint256[] memory playerCardIds, uint256[] memory enemyCardIds) internal returns (bool) {
+    function runBattle(uint256[] memory playerCardIds, uint256[] memory enemyCardIds) internal returns (bool result) {
         uint8 playerFrontIndex = 0;
         uint8 enemyFrontIndex = 0;
 
@@ -153,44 +166,28 @@ contract ExPopulusCards is ERC721, Ownable {
 		uint8 playerAbilityPriority = getAbilityPriority(extendedPlayerCard.card.ability);
 		uint8 enemyAbilityPriority = getAbilityPriority(extendedEnemyCard.card.ability);
 
-		console.log("front indices");
-		console.log(playerFrontIndex, enemyFrontIndex);
-		console.log("card attacks");
-		console.log(extendedPlayerCard.card.attack, extendedEnemyCard.card.attack);
-		console.log("card ability");
-		console.log(extendedPlayerCard.card.ability, extendedEnemyCard.card.ability);
-		console.log("current healths");
-		console.logInt(extendedPlayerCard.currentHealth);
-		console.logInt(extendedEnemyCard.currentHealth);
-		console.log("has used ability");
-		console.log(extendedPlayerCard.hasUsedAbility, extendedEnemyCard.hasUsedAbility);
-		console.log("is shielded");
-		console.log(extendedPlayerCard.isShielded, extendedEnemyCard.isShielded);
-		console.log("is frozen");
-		console.log(extendedPlayerCard.isFrozen, extendedEnemyCard.isFrozen);
-
 		if (playerAbilityPriority >= enemyAbilityPriority) {
 		    if (!extendedPlayerCard.hasUsedAbility) {
-			(extendedPlayerCard, extendedEnemyCard) = processAbility(extendedPlayerCard, extendedEnemyCard);
+			(extendedPlayerCard, extendedEnemyCard) = processAbility(extendedPlayerCard, extendedEnemyCard, PlayerType.Player);
 		    }
 		    if (extendedPlayerCard.wins) {
 			return true;
 		    }
 		    if (!extendedEnemyCard.hasUsedAbility) {
-			(extendedEnemyCard, extendedPlayerCard) = processAbility(extendedEnemyCard, extendedPlayerCard);
+			(extendedEnemyCard, extendedPlayerCard) = processAbility(extendedEnemyCard, extendedPlayerCard, PlayerType.Enemy);
 		    }
 		    if (extendedEnemyCard.wins) {
 			return false;
 		    }
 		} else {
 		    if (!extendedEnemyCard.hasUsedAbility) {
-			(extendedEnemyCard, extendedPlayerCard) = processAbility(extendedEnemyCard, extendedPlayerCard);
+			(extendedEnemyCard, extendedPlayerCard) = processAbility(extendedEnemyCard, extendedPlayerCard, PlayerType.Enemy);
 		    }
 		    if (extendedEnemyCard.wins) {
 			return false;
 		    }
 		    if (!extendedPlayerCard.hasUsedAbility) {
-			(extendedPlayerCard, extendedEnemyCard) = processAbility(extendedPlayerCard, extendedEnemyCard);
+			(extendedPlayerCard, extendedEnemyCard) = processAbility(extendedPlayerCard, extendedEnemyCard, PlayerType.Player);
 		    }
 		    if (extendedPlayerCard.wins) {
 			return true;
@@ -202,7 +199,19 @@ contract ExPopulusCards is ERC721, Ownable {
 	    }
 
             if (extendedPlayerCard.currentHealth <= 0) {
+		battleData[battleId].push(BattleEvent({
+	            eventType: EventType.Death,
+	            playerType: PlayerType.Player,
+	            abilityId: 0,
+	            attackDamage: 0
+	        }));
                 if (playerFrontIndex == 2) {
+		    battleData[battleId].push(BattleEvent({
+		        eventType: EventType.GameEnd,
+		        playerType: PlayerType.Player,
+		        abilityId: 0,
+		        attackDamage: 0
+		    }));
 		    return false;
 		} else {
 		    playerFrontIndex++;
@@ -210,7 +219,19 @@ contract ExPopulusCards is ERC721, Ownable {
 		}
             }
 	    if (extendedEnemyCard.currentHealth <= 0) {
+		battleData[battleId].push(BattleEvent({
+	            eventType: EventType.Death,
+	            playerType: PlayerType.Enemy,
+	            abilityId: 0,
+	            attackDamage: 0
+	        }));
 		if (enemyFrontIndex == 2) {
+		    battleData[battleId].push(BattleEvent({
+		        eventType: EventType.GameEnd,
+		        playerType: PlayerType.Enemy,
+		        abilityId: 0,
+		        attackDamage: 0
+		    }));
 		    return true;
 		} else {
 		    enemyFrontIndex++;
@@ -220,16 +241,16 @@ contract ExPopulusCards is ERC721, Ownable {
         }
     }
 
-    function initializeExtendedCard(uint256 cardId) internal returns (ExtendedCard memory){
+    function initializeExtendedCard(uint256 cardId) internal view returns (ExtendedCard memory){
 	ExPopulusCards.Card memory card = getCardDetails(cardId);
 	return ExtendedCard({card: card, currentHealth: int(card.health), hasUsedAbility: false, isShielded: false, isFrozen: false, wins: false});
     }
 
-    function resetExtendedCardStatus(ExtendedCard memory extendedCard) internal returns (ExtendedCard memory) {
+    function resetExtendedCardStatus(ExtendedCard memory extendedCard) internal pure returns (ExtendedCard memory) {
         return ExtendedCard({card: extendedCard.card, currentHealth: extendedCard.currentHealth, hasUsedAbility: extendedCard.hasUsedAbility, isShielded: false, isFrozen: false, wins: false});
     }
 
-    function processAbility(ExtendedCard memory firstPlayerCard, ExtendedCard memory secondPlayerCard) internal returns (ExtendedCard memory, ExtendedCard memory) {
+    function processAbility(ExtendedCard memory firstPlayerCard, ExtendedCard memory secondPlayerCard, PlayerType firstPlayer) internal returns (ExtendedCard memory, ExtendedCard memory) {
 	uint8 playerAbility = firstPlayerCard.card.ability;
 	if (!firstPlayerCard.isFrozen) {
 	    // Shield
@@ -246,6 +267,12 @@ contract ExPopulusCards is ERC721, Ownable {
 	    }
 	}
 	firstPlayerCard.hasUsedAbility = true;
+	battleData[battleId].push(BattleEvent({
+	    eventType: EventType.Ability,
+	    playerType: firstPlayer,
+	    abilityId: playerAbility,
+	    attackDamage: 0
+        }));
 	return (firstPlayerCard, secondPlayerCard);
     }
 
@@ -256,6 +283,18 @@ contract ExPopulusCards is ERC721, Ownable {
 	if (!secondPlayerExtendedCard.isFrozen && !firstPlayerExtendedCard.isShielded) {
 	    firstPlayerExtendedCard.currentHealth -= int(secondPlayerExtendedCard.card.attack);
 	}
+	battleData[battleId].push(BattleEvent({
+	    eventType: EventType.Attack,
+	    playerType: PlayerType.Player,
+	    abilityId: 0,
+	    attackDamage: firstPlayerExtendedCard.card.attack
+        }));
+	battleData[battleId].push(BattleEvent({
+	    eventType: EventType.Attack,
+	    playerType: PlayerType.Enemy,
+	    abilityId: 0,
+	    attackDamage: firstPlayerExtendedCard.card.attack
+        }));
 	return (firstPlayerExtendedCard, secondPlayerExtendedCard);
     }
 
@@ -269,5 +308,9 @@ contract ExPopulusCards is ERC721, Ownable {
         } else {
             winStreaks[player] = 0;
         }
+    }
+
+    function getBattleData(uint256 _battleId) external view returns (BattleEvent[] memory) {
+	return battleData[_battleId];
     }
 }

@@ -5,6 +5,7 @@ import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { deployContracts } from "../deploy_scripts/main";
 import { BigNumber } from "ethers";
+import { BATTLE_1_DATA } from "./data";
 
 describe("Unit tests - #1/#2", function () {
   before(async function () {
@@ -239,4 +240,34 @@ describe("Unit tests - #3", function () {
       expect(tokenBalance).to.equal(BigNumber.from(1600));
     });
   });
+
+  describe("User story #5 (Logs)", async function () {
+    it("Can get the logs for a battle", async function () {
+      const { exPopulusCards } = this.contracts;
+      const { testAccount2 } = this.signers;
+      const battleData = await exPopulusCards
+        .connect(testAccount2)
+        .getBattleData(1);
+      const convertedBattleData = battleData.map(convertToPureArray);
+      expect(convertedBattleData).to.deep.equal(BATTLE_1_DATA);
+    });
+  });
 });
+
+function convertToPureArray<T>(hybridArray: T[]): T[] {
+  let resultArray = [];
+
+  hybridArray.forEach((element) => {
+    resultArray.push(element);
+  });
+
+  Object.keys(hybridArray).forEach((key) => {
+    if (isNaN(parseInt(key))) {
+      let obj = {};
+      obj[key] = hybridArray[key];
+      resultArray.push(obj);
+    }
+  });
+
+  return resultArray;
+}
