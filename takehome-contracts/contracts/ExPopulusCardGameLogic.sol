@@ -4,5 +4,4 @@ import "hardhat/console.sol";
 import "./ExPopulusCards.sol";
 import "./ExPopulusToken.sol";
 
-contract ExPopulusCardGameLogic {
-}
+contract ExPopulusCardGameLogic {}
