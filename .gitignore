@@ -11,3 +11,4 @@ tcg_portal/public/build
 **/typechain
 **/cache
 **/artifacts
+**/*~
